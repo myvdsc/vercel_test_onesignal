@@ -2,7 +2,6 @@
 <html>
 <head>
   <title>OneSignal Web Push Test</title>
-
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
@@ -11,12 +10,11 @@
   <pre id="log"></pre>
 
   <script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "e672025e-a5ad-462e-9d01-8a15b6f4eaf1",
-    });
-  });
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "e672025e-a5ad-462e-9d01-8a15b6f4eaf1", // 👉 Thay bằng appId thật
+      });
 
       // Theo dõi khi người dùng đã đăng ký xong
       OneSignal.on('subscriptionChange', function (isSubscribed) {
@@ -31,7 +29,9 @@
       });
     });
 
+    // ✅ Hàm subscribe phải được khai báo ngoài push
     function subscribe() {
+      window.OneSignal = window.OneSignal || [];
       OneSignal.push(function () {
         OneSignal.registerForPushNotifications();
       });
