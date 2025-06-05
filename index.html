@@ -24,11 +24,11 @@
 
       btn.disabled = false;
 
-      // Hàm kiểm tra trạng thái đăng ký
       async function checkSubscription() {
-        const isSubscribed = await OneSignal.isPushNotificationsEnabled();
+        // Dùng window.OneSignal để gọi API Promise-based
+        const isSubscribed = await window.OneSignal.isPushNotificationsEnabled();
         if (isSubscribed) {
-          const playerId = await OneSignal.getUserId();
+          const playerId = await window.OneSignal.getUserId();
           log.textContent = "Player ID: " + playerId;
           console.log("Player ID:", playerId);
         } else {
@@ -37,12 +37,11 @@
         }
       }
 
-      // Kiểm tra ngay khi init xong
       await checkSubscription();
 
       btn.addEventListener("click", async () => {
         try {
-          await OneSignal.registerForPushNotifications();
+          await window.OneSignal.registerForPushNotifications();
           await checkSubscription();
           console.log("Đăng ký push thành công");
         } catch (error) {
@@ -51,10 +50,12 @@
         }
       });
 
-      // Nếu cần lắng nghe sự kiện thay đổi subscription
-      OneSignal.on && OneSignal.on("subscriptionChange", (isSubscribed) => {
-        checkSubscription();
-      });
+      // event subscriptionChange
+      if (window.OneSignal.on) {
+        window.OneSignal.on("subscriptionChange", () => {
+          checkSubscription();
+        });
+      }
     });
   </script>
 </body>
