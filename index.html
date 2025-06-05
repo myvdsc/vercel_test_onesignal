@@ -13,27 +13,21 @@
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
-        appId: "e672025e-a5ad-462e-9d01-8a15b6f4eaf1", // 👉 Thay bằng appId thật
-      });
-
-      // Theo dõi khi người dùng đã đăng ký xong
-      OneSignal.on('subscriptionChange', function (isSubscribed) {
-        if (isSubscribed) {
-          OneSignal.getUserId(function (playerId) {
-            document.getElementById("log").textContent = "Player ID: " + playerId;
-            console.log("Player ID:", playerId);
-          });
-        } else {
-          document.getElementById("log").textContent = "User chưa cho phép push";
-        }
+        appId: "e672025e-a5ad-462e-9d01-8a15b6f4eaf1", // dùng App ID thật
       });
     });
 
-    // ✅ Hàm subscribe phải được khai báo ngoài push
     function subscribe() {
       window.OneSignal = window.OneSignal || [];
-      OneSignal.push(function () {
-        OneSignal.registerForPushNotifications();
+      OneSignal.push(async function () {
+        const permission = await OneSignal.User.PushSubscription.request();
+        if (permission) {
+          const playerId = await OneSignal.User.getId();
+          document.getElementById("log").textContent = "Player ID: " + playerId;
+          console.log("Player ID:", playerId);
+        } else {
+          document.getElementById("log").textContent = "User chưa cho phép push";
+        }
       });
     }
   </script>
