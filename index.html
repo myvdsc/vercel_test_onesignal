@@ -2,63 +2,49 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Web Push Test SDK v16</title>
+  <title>Test OneSignal SDK v16</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h2>Test OneSignal Web Push</h2>
-  <button id="subscribeBtn" disabled>Đăng ký nhận thông báo</button>
+  <h1>Test OneSignal Web Push SDK v16</h1>
+  <button id="btnSubscribe" disabled>Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
 
     OneSignalDeferred.push(async (OneSignal) => {
-      await OneSignal.init({
-        appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197", // Thay bằng App ID thật
-        notifyButton: { enable: true }
-      });
-
-      const btn = document.getElementById("subscribeBtn");
-      const log = document.getElementById("log");
-
-      btn.disabled = false;
-
-      async function checkSubscription() {
-        try {
-          const userState = await OneSignal.getUserState();
-          if (userState.isSubscribed) {
-            const playerId = userState.userId;
-            log.textContent = "Player ID: " + playerId;
-            console.log("Player ID:", playerId);
-          } else {
-            log.textContent = "User chưa cho phép push";
-            console.log("User chưa cho phép push");
-          }
-        } catch (error) {
-          log.textContent = "Lỗi kiểm tra subscription: " + error.message;
-          console.error(error);
-        }
-      }
-
-      await checkSubscription();
-
-      btn.addEventListener("click", async () => {
-        try {
-          await OneSignal.registerForPushNotifications();
-          await checkSubscription();
-          console.log("Đăng ký push thành công");
-        } catch (error) {
-          console.error("Lỗi đăng ký push:", error);
-          log.textContent = "Lỗi đăng ký push: " + error.message;
-        }
-      });
-
-      // Lắng nghe sự kiện subscriptionChange nếu có
-      if (OneSignal.on) {
-        OneSignal.on("subscriptionChange", () => {
-          checkSubscription();
+      try {
+        await OneSignal.init({
+          appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197", // Thay bằng App ID thật
+          notifyButton: { enable: true }
         });
+
+        const btn = document.getElementById("btnSubscribe");
+        const log = document.getElementById("log");
+        btn.disabled = false;
+
+        async function checkSubscription() {
+          try {
+            const state = await OneSignal.getUserState();
+            log.textContent = `isSubscribed: ${state.isSubscribed}\nuserId: ${state.userId}`;
+          } catch (e) {
+            log.textContent = "Lỗi kiểm tra subscription: " + e.message;
+          }
+        }
+
+        await checkSubscription();
+
+        btn.onclick = async () => {
+          try {
+            await OneSignal.registerForPushNotifications();
+            await checkSubscription();
+          } catch (e) {
+            log.textContent = "Lỗi đăng ký push: " + e.message;
+          }
+        };
+      } catch (error) {
+        console.error("Lỗi khởi tạo OneSignal:", error);
       }
     });
   </script>
