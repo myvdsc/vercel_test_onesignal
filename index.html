@@ -2,11 +2,11 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal SDK v16 Test</title>
+  <title>OneSignal SDK v16 Demo</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h1>Test OneSignal Push Notifications</h1>
+  <h1>OneSignal Web Push SDK v16</h1>
   <button id="btnSubscribe" disabled>Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
@@ -16,7 +16,7 @@
     OneSignalDeferred.push(async (OneSignal) => {
       try {
         await OneSignal.init({
-          appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197", // Thay App ID thật
+          appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197", // Thay App ID thật ở đây
           notifyButton: { enable: true }
         });
 
@@ -26,12 +26,10 @@
 
         async function checkSubscription() {
           try {
-            const state = await OneSignal.getUserState();
-            log.textContent = `isSubscribed: ${state.isSubscribed}\nuserId: ${state.userId}`;
-            console.log(state);
+            const subscription = await OneSignal.getSubscription();
+            log.textContent = `Subscribed: ${subscription.isSubscribed}\nUser ID: ${subscription.userId}`;
           } catch (e) {
             log.textContent = "Lỗi kiểm tra subscription: " + e.message;
-            console.error(e);
           }
         }
 
@@ -39,15 +37,14 @@
 
         btn.onclick = async () => {
           try {
-            await OneSignal.registerForPushNotifications();
+            await OneSignal.showNativePrompt();
             await checkSubscription();
           } catch (e) {
             log.textContent = "Lỗi đăng ký push: " + e.message;
-            console.error(e);
           }
         };
-      } catch (e) {
-        console.error("Lỗi init OneSignal:", e);
+      } catch (error) {
+        console.error("Lỗi khởi tạo OneSignal:", error);
       }
     });
   </script>
