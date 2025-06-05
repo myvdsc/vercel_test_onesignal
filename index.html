@@ -25,15 +25,19 @@
       btn.disabled = false;
 
       async function checkSubscription() {
-        // Dùng window.OneSignal để gọi API Promise-based
-        const isSubscribed = await window.OneSignal.isPushNotificationsEnabled();
-        if (isSubscribed) {
-          const playerId = await window.OneSignal.getUserId();
-          log.textContent = "Player ID: " + playerId;
-          console.log("Player ID:", playerId);
-        } else {
-          log.textContent = "User chưa cho phép push";
-          console.log("User chưa cho phép push");
+        try {
+          const userState = await OneSignal.getUserState();
+          if (userState.isSubscribed) {
+            const playerId = userState.userId;
+            log.textContent = "Player ID: " + playerId;
+            console.log("Player ID:", playerId);
+          } else {
+            log.textContent = "User chưa cho phép push";
+            console.log("User chưa cho phép push");
+          }
+        } catch (error) {
+          log.textContent = "Lỗi kiểm tra subscription: " + error.message;
+          console.error(error);
         }
       }
 
@@ -41,7 +45,7 @@
 
       btn.addEventListener("click", async () => {
         try {
-          await window.OneSignal.registerForPushNotifications();
+          await OneSignal.registerForPushNotifications();
           await checkSubscription();
           console.log("Đăng ký push thành công");
         } catch (error) {
@@ -50,9 +54,9 @@
         }
       });
 
-      // event subscriptionChange
-      if (window.OneSignal.on) {
-        window.OneSignal.on("subscriptionChange", () => {
+      // Lắng nghe sự kiện subscriptionChange nếu có
+      if (OneSignal.on) {
+        OneSignal.on("subscriptionChange", () => {
           checkSubscription();
         });
       }
