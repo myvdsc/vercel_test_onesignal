@@ -2,44 +2,58 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Web Push Test (SDK v5)</title>
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+  <title>OneSignal Web Push Test (SDK v16)</title>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h2>Test OneSignal Web Push (SDK v5)</h2>
+  <h2>Test OneSignal Web Push (SDK v16)</h2>
   <button id="btnSubscribe">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
   <script>
     const logEl = document.getElementById("log");
+    const btn = document.getElementById("btnSubscribe");
+
     function log(msg) {
       console.log(msg);
       logEl.textContent += msg + "\n";
     }
 
     window.OneSignal = window.OneSignal || [];
-
-    OneSignal.push(function() {
-      OneSignal.init({
-        appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197",
-        notifyButton: {
-          enable: true
-        }
-      });
-
-      log("OneSignal SDK v5 initialized");
-
-      document.getElementById("btnSubscribe").onclick = function() {
-        OneSignal.isPushNotificationsEnabled(function(isEnabled) {
-          log("Push notifications enabled: " + isEnabled);
-          if (!isEnabled) {
-            OneSignal.registerForPushNotifications();
-            log("Yêu cầu đăng ký nhận thông báo");
-          } else {
-            log("Đã đăng ký nhận thông báo rồi");
+    OneSignal.push(async function(OneSignal) {
+      try {
+        await OneSignal.init({
+          appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197",
+          notifyButton: {
+            enable: true
           }
         });
-      };
+        log("OneSignal SDK v16 initialized");
+
+        // Kiểm tra trạng thái đăng ký
+        async function checkSubscription() {
+          const isEnabled = await OneSignal.isPushNotificationsEnabled();
+          log("Push notifications enabled: " + isEnabled);
+          return isEnabled;
+        }
+
+        btn.addEventListener("click", async () => {
+          try {
+            const isSubscribed = await checkSubscription();
+            if (!isSubscribed) {
+              await OneSignal.showNativePrompt();
+              log("Yêu cầu đăng ký nhận thông báo đã gửi");
+            } else {
+              log("Bạn đã đăng ký nhận thông báo rồi");
+            }
+          } catch (err) {
+            log("Lỗi đăng ký push: " + err.message);
+          }
+        });
+
+      } catch (err) {
+        log("Lỗi khởi tạo OneSignal: " + err.message);
+      }
     });
   </script>
 </body>
