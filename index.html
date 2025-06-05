@@ -2,34 +2,39 @@
 <html>
 <head>
   <title>OneSignal Web Push Test</title>
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
 </head>
 <body>
   <h2>Test OneSignal Web Push</h2>
-  <button onclick="initOneSignal()">Đăng ký nhận thông báo</button>
+  <button onclick="subscribe()">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
   <script>
-    function initOneSignal() {
-      window.OneSignal = window.OneSignal || [];
-      OneSignal.push(function() {
-        OneSignal.init({
-          appId: "e672025e-a5ad-462e-9d01-8a15b6f4eaf1", // 👈 Thay bằng App ID thật
-          notifyButton: {
-            enable: true
-          }
-        });
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function () {
+      OneSignal.init({
+        appId: "e672025e-a5ad-462e-9d01-8a15b6f4eaf1", // Thay bằng App ID thật
+        notifyButton: {
+          enable: false // Tắt nút nổi, mình dùng nút riêng
+        }
+      });
 
-        OneSignal.on('subscriptionChange', function (isSubscribed) {
-          if (isSubscribed) {
-            OneSignal.getUserId(function(playerId) {
-              document.getElementById("log").textContent = "Player ID: " + playerId;
-              console.log("Player ID:", playerId);
-            });
-          } else {
-            document.getElementById("log").textContent = "User chưa cho phép push";
-          }
-        });
+      // Theo dõi khi người dùng đã đăng ký xong
+      OneSignal.on('subscriptionChange', function (isSubscribed) {
+        if (isSubscribed) {
+          OneSignal.getUserId(function (playerId) {
+            document.getElementById("log").textContent = "Player ID: " + playerId;
+            console.log("Player ID:", playerId);
+          });
+        } else {
+          document.getElementById("log").textContent = "User chưa cho phép push";
+        }
+      });
+    });
+
+    function subscribe() {
+      OneSignal.push(function () {
+        OneSignal.registerForPushNotifications();
       });
     }
   </script>
