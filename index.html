@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OneSignal Web Push Test</title>
+  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+</head>
+<body>
+  <h2>Test OneSignal Web Push</h2>
+  <button onclick="initOneSignal()">Đăng ký nhận thông báo</button>
+  <pre id="log"></pre>
+
+  <script>
+    function initOneSignal() {
+      window.OneSignal = window.OneSignal || [];
+      OneSignal.push(function() {
+        OneSignal.init({
+          appId: "YOUR_APP_ID", // 👈 Thay bằng App ID thật
+          notifyButton: {
+            enable: true
+          }
+        });
+
+        OneSignal.on('subscriptionChange', function (isSubscribed) {
+          if (isSubscribed) {
+            OneSignal.getUserId(function(playerId) {
+              document.getElementById("log").textContent = "Player ID: " + playerId;
+              console.log("Player ID:", playerId);
+            });
+          } else {
+            document.getElementById("log").textContent = "User chưa cho phép push";
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>
