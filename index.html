@@ -2,11 +2,11 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Test OneSignal SDK v16</title>
+  <title>OneSignal SDK v16 Test</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h1>Test OneSignal Web Push SDK v16</h1>
+  <h1>Test OneSignal Push Notifications</h1>
   <button id="btnSubscribe" disabled>Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
@@ -16,7 +16,7 @@
     OneSignalDeferred.push(async (OneSignal) => {
       try {
         await OneSignal.init({
-          appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197", // Thay bằng App ID thật
+          appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197", // Thay App ID thật
           notifyButton: { enable: true }
         });
 
@@ -28,8 +28,10 @@
           try {
             const state = await OneSignal.getUserState();
             log.textContent = `isSubscribed: ${state.isSubscribed}\nuserId: ${state.userId}`;
+            console.log(state);
           } catch (e) {
             log.textContent = "Lỗi kiểm tra subscription: " + e.message;
+            console.error(e);
           }
         }
 
@@ -41,10 +43,11 @@
             await checkSubscription();
           } catch (e) {
             log.textContent = "Lỗi đăng ký push: " + e.message;
+            console.error(e);
           }
         };
-      } catch (error) {
-        console.error("Lỗi khởi tạo OneSignal:", error);
+      } catch (e) {
+        console.error("Lỗi init OneSignal:", e);
       }
     });
   </script>
