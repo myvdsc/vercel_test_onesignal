@@ -2,61 +2,51 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Web Push v16 Test</title>
-
-  <!-- Service Worker manifest -->
-  <link rel="manifest" href="manifest.json" />
-
-  <!-- OneSignal SDK v16 -->
+  <title>OneSignal Web Push Test (SDK v16)</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
   <h2>Test OneSignal Web Push (SDK v16)</h2>
-  <button id="subscribeBtn">Đăng ký nhận thông báo</button>
+  <button id="btnSubscribe">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
   <script>
     const logEl = document.getElementById("log");
-    const log = (msg) => {
+    const btn = document.getElementById("btnSubscribe");
+
+    function log(msg) {
       console.log(msg);
       logEl.textContent += msg + "\n";
-    };
+    }
 
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
       try {
         await OneSignal.init({
-          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // ✅ Thay bằng App ID thật từ OneSignal
+          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // 👈 Thay bằng appId của bạn
+          serviceWorkerParam: { scope: "/" },
           serviceWorkerPath: "OneSignalSDKWorker.js",
           serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
-          promptOptions: {
-            slidedown: {
-              enabled: true,
-              autoPrompt: false,
-              actionMessage: "Bạn có muốn nhận thông báo?",
-              acceptButtonText: "Đồng ý",
-              cancelButtonText: "Từ chối"
-            }
-          }
         });
-
         log("✅ OneSignal initialized");
 
-        const subscription = await OneSignal.user.pushSubscription.get();
-        if (subscription && subscription.id) {
-          log("🔔 Đã đăng ký với Player ID: " + subscription.id);
-        } else {
-          log("❌ Chưa đăng ký nhận thông báo.");
-        }
-
-        document.getElementById("subscribeBtn").addEventListener("click", async () => {
+        btn.addEventListener("click", async () => {
           try {
-            await OneSignal.user.pushSubscription.optIn();
-            const sub = await OneSignal.User.PushSubscription.get();
+            const permission = await OneSignal.notifications.permissionNative();
+            log("🔐 Permission: " + permission);
+
+            if (permission !== "granted") {
+              log("📣 Đang yêu cầu người dùng cấp quyền...");
+              await OneSignal.notifications.requestPermission();
+            }
+
+            const sub = await OneSignal.user.pushSubscription.get();
             if (sub && sub.id) {
-              log("✅ Đăng ký thành công với Player ID: " + sub.id);
+              log("✅ Đã đăng ký rồi. Player ID: " + sub.id);
             } else {
-              log("❌ Không lấy được Player ID sau khi đăng ký.");
+              await OneSignal.user.pushSubscription.optIn();
+              const newSub = await OneSignal.user.pushSubscription.get();
+              log("🆕 Đăng ký mới. Player ID: " + (newSub?.id || "Không rõ"));
             }
           } catch (err) {
             log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
