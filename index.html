@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Web Push v16 Test</title>
+  <title>OneSignal Web Push Test v16</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
@@ -12,47 +12,39 @@
 
   <script>
     const logEl = document.getElementById("log");
-    const log = (msg) => {
+    function log(msg) {
       console.log(msg);
       logEl.textContent += msg + "\n";
-    };
+    }
 
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      try {
-        await OneSignal.init({
-          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // 👈 Thay bằng OneSignal App ID
-          notifyButton: { enable: true }
-        });
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function() {
+      OneSignal.init({
+        appId: "53c86d63-20f1-4b62-803a-52183b5efcc9",
+        notifyButton: { enable: true }
+      });
 
-        log("✅ OneSignal initialized");
+      log("✅ OneSignal initialized");
 
-        const btn = document.getElementById("btnSubscribe");
+      const btn = document.getElementById("btnSubscribe");
+      btn.addEventListener("click", async () => {
+        try {
+          const permission = await OneSignal.getNotificationPermission();
+          log("🔐 Notification permission: " + permission);
 
-        btn.addEventListener("click", async () => {
-          try {
-            const permission = await OneSignal.Notifications.permissionNative();
-            log("🔐 Notification permission: " + permission);
-
-            if (permission !== "granted") {
-              await OneSignal.Notifications.requestPermission();
-              log("📣 Đã gửi yêu cầu quyền nhận thông báo");
-            }
-
-            const isPushEnabled = await OneSignal.Notifications.isPushEnabled();
-            log("📬 Push enabled: " + isPushEnabled);
-
-            if (isPushEnabled) {
-              const userId = await OneSignal.User.getId();
-              log("🎯 Player ID: " + userId);
-            }
-          } catch (err) {
-            log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
+          if (permission === "default") {
+            await OneSignal.registerForPushNotifications();
+            log("📣 Đã gửi yêu cầu quyền nhận thông báo");
+          } else if (permission === "granted") {
+            const userId = await OneSignal.getUserId();
+            log("🎯 Player ID: " + userId);
+          } else {
+            log("⚠️ Người dùng đã chặn quyền nhận thông báo");
           }
-        });
-      } catch (err) {
-        log("❌ Lỗi khởi tạo OneSignal: " + err.message);
-      }
+        } catch (err) {
+          log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
+        }
+      });
     });
   </script>
 </body>
