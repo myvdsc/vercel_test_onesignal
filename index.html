@@ -1,23 +1,98 @@
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "eb033a43-2e3c-4f14-a0b1-95b9ef93d670", // 👉 Thay bằng App ID thật
-    });
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>OneSignal Web Push Test (SDK v16)</title>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #log { white-space: pre-wrap; background: #f0f0f0; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; }
+    button { padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h2>OneSignal Web Push Test (SDK v16)</h2>
+  <button id="btnSubscribe">Đăng ký nhận thông báo</button>
+  <pre id="log"></pre>
 
-    // Kiểm tra quyền
-    const permission = await OneSignal.Notifications.permission;
-    console.log("Quyền hiện tại:", permission);
+  <script>
+    const logEl = document.getElementById("log");
+    const btn = document.getElementById("btnSubscribe");
 
-    if (permission === "default") {
-      // Hiển thị popup native
-      await OneSignal.Notifications.requestPermission();
-      console.log("Đã yêu cầu quyền thông báo.");
-    } else if (permission === "granted") {
-      console.log("Đã cấp quyền.");
-    } else {
-      console.warn("Người dùng đã chặn thông báo.");
+    function log(msg) {
+      console.log(msg);
+      logEl.textContent += msg + "\n";
     }
-  });
-</script>
+
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(async function(OneSignal) {
+      try {
+        await OneSignal.init({
+          appId: "eb033a43-2e3c-4f14-a0b1-95b9ef93d670",
+          notifyButton: {
+            enable: true
+          }
+        });
+        log("✅ OneSignal SDK v16 initialized.");
+
+        async function checkPermission() {
+          const permission = await OneSignal.Notifications.permission;
+          log("Quyền hiện tại: " + permission);
+          return permission;
+        }
+
+        async function checkSubscription() {
+          try {
+            const enabled = await OneSignal.isPushNotificationsEnabled();
+            log("Push notifications enabled: " + enabled);
+            return enabled;
+          } catch(e) {
+            log("Lỗi khi kiểm tra đăng ký push: " + e.message);
+            return false;
+          }
+        }
+
+        btn.addEventListener("click", async () => {
+          try {
+            const permission = await checkPermission();
+            if (permission === "default") {
+              log("Yêu cầu cấp quyền thông báo...");
+              await OneSignal.Notifications.requestPermission();
+              const newPerm = await checkPermission();
+              if (newPerm !== "granted") {
+                log("❌ Người dùng từ chối cấp quyền.");
+                return;
+              }
+              log("✅ Đã cấp quyền thông báo.");
+            } else if (permission === "denied") {
+              log("⚠️ Người dùng đã chặn thông báo, vui lòng bật thủ công trong trình duyệt.");
+              return;
+            }
+
+            const isSubscribed = await checkSubscription();
+            if (!isSubscribed) {
+              log("Đang đăng ký nhận thông báo...");
+              await OneSignal.registerForPushNotifications();
+            } else {
+              log("Bạn đã đăng ký nhận thông báo rồi.");
+            }
+
+            const playerId = await OneSignal.getUserId();
+            if (playerId) {
+              log("Player ID: " + playerId);
+            } else {
+              log("Chưa có Player ID, vui lòng thử lại sau.");
+            }
+
+          } catch (err) {
+            log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
+          }
+        });
+
+      } catch (err) {
+        log("❌ Lỗi khởi tạo OneSignal: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
