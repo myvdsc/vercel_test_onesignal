@@ -2,11 +2,11 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Web Push Test</title>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" async></script>
+  <title>OneSignal Web Push Test (SDK v16)</title>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h2>Test OneSignal Web Push</h2>
+  <h2>Test OneSignal Web Push (SDK v16)</h2>
   <button id="btnSubscribe">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
@@ -20,38 +20,37 @@
     }
 
     window.OneSignal = window.OneSignal || [];
-    window.OneSignal.push(function () {
-      log("✅ OneSignal.push() called");
-
+    
+    OneSignal.push(function() {
+      log("OneSignal.push() called");  // Kiểm tra OneSignal có được gọi
+      
       OneSignal.init({
         appId: "aa527f2f-34c0-41c8-909c-1723a32c8d07",
-		serviceWorkerPath: "OneSignalSDKWorker.js",
-      	serviceWorkerParam: { scope: "/" },
         notifyButton: {
           enable: true
         }
       }).then(() => {
-        log("✅ OneSignal initialized");
+        log("OneSignal initialized");
 
         btn.addEventListener("click", async () => {
-          log("👆 Click nút Đăng ký");
+          log("Nút đăng ký được click");
 
           try {
-            const isPushEnabled = await OneSignal.isPushNotificationsEnabled();
-            log("🔔 Push enabled: " + isPushEnabled);
+            const isEnabled = await OneSignal.isPushNotificationsEnabled();
+            log("Push notifications enabled: " + isEnabled);
 
-            if (!isPushEnabled) {
+            if (!isEnabled) {
               await OneSignal.showNativePrompt();
-              log("📢 Gửi yêu cầu nhận thông báo");
+              log("Yêu cầu đăng ký nhận thông báo đã gửi");
             } else {
-              log("📬 Đã đăng ký rồi");
+              log("Bạn đã đăng ký nhận thông báo rồi");
             }
           } catch (err) {
-            log("❌ Lỗi đăng ký: " + err.message);
+            log("Lỗi đăng ký push: " + err.message);
           }
         });
       }).catch(err => {
-        log("❌ Lỗi khởi tạo: " + err.message);
+        log("Lỗi khởi tạo OneSignal: " + err.message);
       });
     });
   </script>
