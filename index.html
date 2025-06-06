@@ -42,7 +42,7 @@
 
         log("✅ OneSignal initialized");
 
-        const subscription = await OneSignal.User.PushSubscription.get();
+        const subscription = await OneSignal.user.pushSubscription.get();
         if (subscription && subscription.id) {
           log("🔔 Đã đăng ký với Player ID: " + subscription.id);
         } else {
@@ -51,7 +51,7 @@
 
         document.getElementById("subscribeBtn").addEventListener("click", async () => {
           try {
-            await OneSignal.User.PushSubscription.optIn();
+            await OneSignal.user.pushSubscription.optIn();
             const sub = await OneSignal.User.PushSubscription.get();
             if (sub && sub.id) {
               log("✅ Đăng ký thành công với Player ID: " + sub.id);
