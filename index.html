@@ -31,7 +31,7 @@
           try {
             const isPushEnabled = await OneSignal.isPushNotificationsEnabled();
             log("🔐 Push enabled: " + isPushEnabled);
-            
+
             if (!isPushEnabled) {
               await OneSignal.showNativePrompt();
               log("📣 Đã gửi yêu cầu quyền");
