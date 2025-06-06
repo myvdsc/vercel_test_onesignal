@@ -6,7 +6,7 @@
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h2>OneSignal Web Push Test</h2>
+  <h2>OneSignal Web Push Test (SDK v16)</h2>
   <button id="subscribe">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
@@ -17,18 +17,18 @@
     OneSignalDeferred.push(async function(OneSignal) {
       try {
         await OneSignal.init({
-          appId: "eb033a43-2e3c-4f14-a0b1-95b9ef93d670", // 🔁 Thay bằng App ID thật
+          appId: "eb033a43-2e3c-4f14-a0b1-95b9ef93d670", // 🔁 Thay bằng App ID thực tế
         });
-        log("✅ OneSignal đã khởi tạo");
+        log("✅ OneSignal SDK v16 đã khởi tạo");
 
         document.getElementById("subscribe").addEventListener("click", async () => {
           try {
-            const status = await OneSignal.Notifications.permissionNative();
-            log("🔔 Trạng thái cấp quyền hiện tại: " + status);
+            const level = await OneSignal.Notification.permissionLevel();
+            log("🔔 Quyền thông báo hiện tại: " + level);
 
-            if (status !== "granted") {
-              await OneSignal.Notifications.requestPermission(); // Gửi prompt
-              log("📩 Đã gửi yêu cầu hiển thị popup cấp quyền");
+            if (level !== "granted") {
+              await OneSignal.Notification.requestPermission();
+              log("📩 Đã gửi yêu cầu hiển thị popup thông báo");
             }
 
             const userId = await OneSignal.User.getId();
@@ -37,9 +37,8 @@
             log("❌ Lỗi đăng ký nhận thông báo: " + e.message);
           }
         });
-
       } catch (e) {
-        log("❌ Lỗi khởi tạo: " + e.message);
+        log("❌ Lỗi khởi tạo OneSignal: " + e.message);
       }
     });
   </script>
