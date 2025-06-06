@@ -18,18 +18,19 @@
     }
 
     window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
+
+    OneSignalDeferred.push(async (OneSignal) => {
       log("✅ OneSignal initialized");
 
       await OneSignal.init({
-        appId: "53c86d63-20f1-4b62-803a-52183b5efcc9",  // Thay bằng App ID thật
+        appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // Thay bằng App ID thật
       });
 
       const btn = document.getElementById("btnSubscribe");
 
       btn.addEventListener("click", async () => {
         try {
-          // Kiểm tra trạng thái đăng ký
+          // Để chắc chắn gọi API trên instance OneSignal trong callback
           const subscription = await OneSignal.getSubscription();
           const permission = await OneSignal.getNotificationPermission();
 
@@ -37,7 +38,6 @@
           log(`🔐 Permission: ${permission}`);
 
           if (!subscription && permission !== 'granted') {
-            // Yêu cầu quyền đăng ký nhận thông báo
             await OneSignal.registerForPushNotifications();
             log("📣 Đã gửi yêu cầu quyền đăng ký nhận thông báo");
           } else if (subscription) {
@@ -46,7 +46,6 @@
           } else {
             log("🚫 Người dùng chưa cho phép nhận thông báo");
           }
-
         } catch (err) {
           log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
         }
