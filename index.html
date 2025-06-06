@@ -25,6 +25,8 @@
 
       OneSignal.init({
         appId: "eb033a43-2e3c-4f14-a0b1-95b9ef93d670",
+		serviceWorkerPath: "OneSignalSDKWorker.js",
+      	serviceWorkerParam: { scope: "/" },
         notifyButton: {
           enable: true
         }
