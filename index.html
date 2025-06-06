@@ -2,11 +2,11 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal v16 Test</title>
+  <title>OneSignal Web Push Test (SDK v16)</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h2>Test OneSignal Web Push</h2>
+  <h2>Test OneSignal Web Push (SDK v16)</h2>
   <button id="btnSubscribe">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
@@ -21,28 +21,34 @@
     OneSignalDeferred.push(async function(OneSignal) {
       log("✅ OneSignal initialized");
 
-      // Khởi tạo OneSignal SDK với appId
       await OneSignal.init({
-        appId: "53c86d63-20f1-4b62-803a-52183b5efcc9",  // <-- Thay appId ở đây
+        appId: "53c86d63-20f1-4b62-803a-52183b5efcc9",  // Thay bằng App ID thật
       });
 
-      log("OneSignal.isPushNotificationsEnabled typeof: " + typeof OneSignal.isPushNotificationsEnabled);
-
       const btn = document.getElementById("btnSubscribe");
+
       btn.addEventListener("click", async () => {
         try {
-          const enabled = await OneSignal.isPushNotificationsEnabled();
-          log("🔐 Push enabled: " + enabled);
+          // Kiểm tra trạng thái đăng ký
+          const subscription = await OneSignal.getSubscription();
+          const permission = await OneSignal.getNotificationPermission();
 
-          if (!enabled) {
-            await OneSignal.showNativePrompt();
-            log("📣 Đã gửi yêu cầu quyền");
-          } else {
+          log(`🔐 Subscription: ${subscription}`);
+          log(`🔐 Permission: ${permission}`);
+
+          if (!subscription && permission !== 'granted') {
+            // Yêu cầu quyền đăng ký nhận thông báo
+            await OneSignal.registerForPushNotifications();
+            log("📣 Đã gửi yêu cầu quyền đăng ký nhận thông báo");
+          } else if (subscription) {
             const userId = await OneSignal.getUserId();
-            log("🎯 Player ID: " + userId);
+            log(`🎯 Player ID: ${userId}`);
+          } else {
+            log("🚫 Người dùng chưa cho phép nhận thông báo");
           }
-        } catch (e) {
-          log("❌ Lỗi đăng ký nhận thông báo: " + e.message);
+
+        } catch (err) {
+          log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
         }
       });
     });
