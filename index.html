@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Test OneSignal v16</title>
+  <meta charset="UTF-8" />
+  <title>OneSignal Web Push Test v16</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h2>Test OneSignal v16</h2>
-  <button id="subscribe">Đăng ký nhận thông báo</button>
+  <h2>Test OneSignal Web Push (SDK v16)</h2>
+  <button id="btnSubscribe">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
   <script>
@@ -17,31 +17,34 @@
       logEl.textContent += msg + "\n";
     }
 
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      try {
-        await OneSignal.init({
-          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // <-- Thay bằng appId thật của bạn
-        });
-        log("✅ OneSignal initialized");
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function() {
+      OneSignal.init({
+        appId: "53c86d63-20f1-4b62-803a-52183b5efcc9",
+        notifyButton: { enable: true }
+      });
 
-        document.getElementById("subscribe").addEventListener("click", async () => {
-          const permission = await OneSignal.Notifications.permissionNative(); // lấy quyền
-          log("🔐 Permission: " + permission);
+      log("✅ OneSignal initialized");
 
-          if (permission !== "granted") {
-            await OneSignal.Notifications.requestPermission();
-            log("📣 Đã gửi yêu cầu quyền");
+      const btn = document.getElementById("btnSubscribe");
+      btn.addEventListener("click", async () => {
+        try {
+          const permission = await OneSignal.getNotificationPermission();
+          log("🔐 Notification permission: " + permission);
+
+          if (permission === "default") {
+            await OneSignal.registerForPushNotifications();
+            log("📣 Đã gửi yêu cầu quyền nhận thông báo");
+          } else if (permission === "granted") {
+            const userId = await OneSignal.getUserId();
+            log("🎯 Player ID: " + userId);
+          } else {
+            log("⚠️ Người dùng đã chặn quyền nhận thông báo");
           }
-
-          // Sau khi người dùng cho phép, lấy playerId
-          const user = await OneSignal.User.get();
-          log("🎯 Player ID: " + user.id);
-        });
-
-      } catch (e) {
-        log("❌ Lỗi khởi tạo hoặc đăng ký: " + e.message);
-      }
+        } catch (err) {
+          log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
+        }
+      });
     });
   </script>
 </body>
