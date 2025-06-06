@@ -2,95 +2,72 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Web Push Test (SDK v16)</title>
+  <title>OneSignal Web Push v16 Test</title>
+
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- OneSignal SDK v16 -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    #log { white-space: pre-wrap; background: #f0f0f0; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; }
-    button { padding: 10px 20px; font-size: 16px; }
-  </style>
+
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      try {
+        await OneSignal.init({
+          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // 🔁 Thay bằng App ID từ OneSignal Dashboard
+          serviceWorkerPath: "OneSignalSDKWorker.js",
+          serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
+          autoResubscribe: true,
+          promptOptions: {
+            slidedown: {
+              enabled: true,
+              actionMessage: "Bạn muốn nhận thông báo từ trang web?",
+              acceptButtonText: "Cho phép",
+              cancelButtonText: "Từ chối"
+            }
+          }
+        });
+
+        console.log("✅ OneSignal initialized");
+
+        const permission = await OneSignal.Notifications.permissionNative();
+        console.log("Quyền hiện tại:", permission);
+
+        const isSubscribed = await OneSignal.Notifications.isPushEnabled();
+        console.log("Push đang bật:", isSubscribed);
+
+      } catch (e) {
+        console.error("❌ Lỗi khởi tạo OneSignal:", e);
+      }
+    });
+  </script>
 </head>
 <body>
-  <h2>OneSignal Web Push Test (SDK v16)</h2>
-  <button id="btnSubscribe">Đăng ký nhận thông báo</button>
+  <h2>Test OneSignal Web Push (SDK v16)</h2>
+  <button id="subscribeBtn">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
   <script>
-    const logEl = document.getElementById("log");
-    const btn = document.getElementById("btnSubscribe");
-
-    function log(msg) {
+    const log = msg => {
+      document.getElementById("log").textContent += msg + "\n";
       console.log(msg);
-      logEl.textContent += msg + "\n";
-    }
+    };
 
-    window.OneSignal = window.OneSignal || [];
-    OneSignal.push(async function(OneSignal) {
+    document.getElementById("subscribeBtn").addEventListener("click", async () => {
       try {
-        await OneSignal.init({
-          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9",
-          notifyButton: {
-            enable: true
-          }
-        });
-        log("✅ OneSignal SDK v16 initialized.");
+        const OneSignal = window.OneSignal;
+        const isPushEnabled = await OneSignal.Notifications.isPushEnabled();
 
-        async function checkPermission() {
-          const permission = await OneSignal.Notifications.permission;
-          log("Quyền hiện tại: " + permission);
-          return permission;
+        if (!isPushEnabled) {
+          await OneSignal.Notifications.requestPermission();
+          log("✅ Đã yêu cầu bật thông báo.");
+        } else {
+          log("🔔 Bạn đã đăng ký nhận thông báo rồi.");
         }
-
-        async function checkSubscription() {
-          try {
-            const enabled = await OneSignal.isPushNotificationsEnabled();
-            log("Push notifications enabled: " + enabled);
-            return enabled;
-          } catch(e) {
-            log("Lỗi khi kiểm tra đăng ký push: " + e.message);
-            return false;
-          }
-        }
-
-        btn.addEventListener("click", async () => {
-          try {
-            const permission = await checkPermission();
-            if (permission === "default") {
-              log("Yêu cầu cấp quyền thông báo...");
-              await OneSignal.Notifications.requestPermission();
-              const newPerm = await checkPermission();
-              if (newPerm !== "granted") {
-                log("❌ Người dùng từ chối cấp quyền.");
-                return;
-              }
-              log("✅ Đã cấp quyền thông báo.");
-            } else if (permission === "denied") {
-              log("⚠️ Người dùng đã chặn thông báo, vui lòng bật thủ công trong trình duyệt.");
-              return;
-            }
-
-            const isSubscribed = await checkSubscription();
-            if (!isSubscribed) {
-              log("Đang đăng ký nhận thông báo...");
-              await OneSignal.registerForPushNotifications();
-            } else {
-              log("Bạn đã đăng ký nhận thông báo rồi.");
-            }
-
-            const playerId = await OneSignal.getUserId();
-            if (playerId) {
-              log("Player ID: " + playerId);
-            } else {
-              log("Chưa có Player ID, vui lòng thử lại sau.");
-            }
-
-          } catch (err) {
-            log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
-          }
-        });
 
       } catch (err) {
-        log("❌ Lỗi khởi tạo OneSignal: " + err.message);
+        log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
       }
     });
   </script>
