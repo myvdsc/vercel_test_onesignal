@@ -32,27 +32,28 @@
         log("✅ OneSignal initialized");
 
         btn.addEventListener("click", async () => {
-          try {
-            const permission = await OneSignal.Notifications.permission;
-            log("🔐 Quyền hiện tại: " + permission);
+  try {
+    const permission = await OneSignal.Notifications.permission;
+    log("🔐 Quyền hiện tại: " + permission);
 
-            if (permission !== "granted") {
-              await OneSignal.Notifications.requestPermission();
-              log("📣 Đã gửi yêu cầu quyền");
-            }
+    if (permission !== "granted") {
+      await OneSignal.Notifications.requestPermission();
+      log("📣 Đã gửi yêu cầu quyền");
+    }
 
-            const sub = await OneSignal.User.PushSubscription.get();
-            if (sub && sub.id) {
-              log("✅ Đã đăng ký. Player ID: " + sub.id);
-            } else {
-              await OneSignal.User.PushSubscription.optIn();
-              const newSub = await OneSignal.User.PushSubscription.get();
-              log("🆕 Player ID mới: " + (newSub?.id || "Không rõ"));
-            }
-          } catch (err) {
-            log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
-          }
-        });
+    const sub = await OneSignal.User.PushSubscription.getSubscription();
+    if (sub && sub.id) {
+      log("✅ Đã đăng ký. Player ID: " + sub.id);
+    } else {
+      await OneSignal.User.PushSubscription.optIn();
+      const newSub = await OneSignal.User.PushSubscription.getSubscription();
+      log("🆕 Player ID mới: " + (newSub?.id || "Không rõ"));
+    }
+  } catch (err) {
+    log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
+  }
+});
+
       } catch (err) {
         log("❌ Lỗi khởi tạo OneSignal: " + err.message);
       }
