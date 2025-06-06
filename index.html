@@ -2,11 +2,13 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Web Push v16</title>
+  <title>OneSignal Web Push (SDK v16)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="/manifest.json" />
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h2>Test OneSignal Web Push (SDK v16)</h2>
+  <h2>🔔 OneSignal Web Push Test (SDK v16)</h2>
   <button id="btnSubscribe">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
@@ -23,36 +25,35 @@
     OneSignalDeferred.push(async function (OneSignal) {
       try {
         await OneSignal.init({
-          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // 👈 Thay bằng appId thực tế
+          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // 👉 Thay bằng App ID thực tế
+          serviceWorkerParam: { scope: "/" },
           serviceWorkerPath: "OneSignalSDKWorker.js",
-          serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
-          serviceWorkerParam: { scope: "/" }
+          serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js"
         });
 
         log("✅ OneSignal initialized");
 
         btn.addEventListener("click", async () => {
-  try {
-    const permission = await OneSignal.Notifications.permission;
-    log("🔐 Quyền hiện tại: " + permission);
+          try {
+            const permission = await OneSignal.Notifications.permission;
+            log("🔐 Quyền hiện tại: " + permission);
 
-    if (permission !== "granted") {
-      await OneSignal.Notifications.requestPermission();
-      log("📣 Đã gửi yêu cầu quyền");
-    }
+            if (permission !== "granted") {
+              await OneSignal.Notifications.requestPermission();
+              log("📣 Đã gửi yêu cầu quyền");
+            }
 
-    const sub = await OneSignal.User.PushSubscription.getSubscription();
-    if (sub && sub.id) {
-      log("✅ Đã đăng ký. Player ID: " + sub.id);
-    } else {
-      await OneSignal.User.PushSubscription.optIn();
-      const newSub = await OneSignal.User.PushSubscription.getSubscription();
-      log("🆕 Player ID mới: " + (newSub?.id || "Không rõ"));
-    }
-  } catch (err) {
-    log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
-  }
-});
+            const sub = await OneSignal.User.PushSubscription.getSubscription();
+            if (sub) {
+              log("🎯 Subscribed. ID: " + sub.id);
+            } else {
+              log("❌ Chưa có subscription.");
+            }
+
+          } catch (err) {
+            log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
+          }
+        });
 
       } catch (err) {
         log("❌ Lỗi khởi tạo OneSignal: " + err.message);
