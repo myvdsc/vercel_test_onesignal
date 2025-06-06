@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Test</title>
+  <title>OneSignal Web Push Test</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" async></script>
 </head>
 <body>
@@ -19,11 +19,9 @@
       logEl.textContent += msg + "\n";
     }
 
-    // Đợi OneSignal SDK load xong
     window.OneSignal = window.OneSignal || [];
-
-    OneSignal.push(function() {
-      log("OneSignal.push() called");
+    window.OneSignal.push(function () {
+      log("✅ OneSignal.push() called");
 
       OneSignal.init({
         appId: "eb033a43-2e3c-4f14-a0b1-95b9ef93d670",
@@ -31,27 +29,27 @@
           enable: true
         }
       }).then(() => {
-        log("OneSignal initialized");
+        log("✅ OneSignal initialized");
 
         btn.addEventListener("click", async () => {
-          log("Nút đăng ký được click");
+          log("👆 Click nút Đăng ký");
 
           try {
-            const isEnabled = await OneSignal.isPushNotificationsEnabled();
-            log("Push notifications enabled: " + isEnabled);
+            const isPushEnabled = await OneSignal.isPushNotificationsEnabled();
+            log("🔔 Push enabled: " + isPushEnabled);
 
-            if (!isEnabled) {
+            if (!isPushEnabled) {
               await OneSignal.showNativePrompt();
-              log("Yêu cầu đăng ký nhận thông báo đã gửi");
+              log("📢 Gửi yêu cầu nhận thông báo");
             } else {
-              log("Bạn đã đăng ký nhận thông báo rồi");
+              log("📬 Đã đăng ký rồi");
             }
           } catch (err) {
-            log("Lỗi đăng ký push: " + err.message);
+            log("❌ Lỗi đăng ký: " + err.message);
           }
         });
       }).catch(err => {
-        log("Lỗi khởi tạo OneSignal: " + err.message);
+        log("❌ Lỗi khởi tạo: " + err.message);
       });
     });
   </script>
