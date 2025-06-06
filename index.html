@@ -23,28 +23,35 @@
     OneSignal.push(async function(OneSignal) {
       try {
         await OneSignal.init({
-          appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197",
+          appId: "608c044d-8bdb-4bcf-aed1-fc0eb309c197",  // Thay đúng App ID
           notifyButton: {
             enable: true
           }
         });
         log("OneSignal SDK v16 initialized");
 
-        // Kiểm tra trạng thái đăng ký
-        async function checkSubscription() {
-          const isEnabled = await OneSignal.isPushNotificationsEnabled();
-          log("Push notifications enabled: " + isEnabled);
-          return isEnabled;
-        }
+        // Lắng nghe sự kiện subscription thay đổi
+        OneSignal.on("subscriptionChange", async (isSubscribed) => {
+          log("Subscription changed: " + isSubscribed);
+          if (isSubscribed) {
+            const playerId = await OneSignal.getUserId();
+            log("Player ID: " + playerId);
+          } else {
+            log("User chưa đăng ký push");
+          }
+        });
 
         btn.addEventListener("click", async () => {
           try {
-            const isSubscribed = await checkSubscription();
+            const isSubscribed = await OneSignal.isPushNotificationsEnabled();
+            log("Push enabled: " + isSubscribed);
             if (!isSubscribed) {
               await OneSignal.showNativePrompt();
-              log("Yêu cầu đăng ký nhận thông báo đã gửi");
+              log("Đã gọi hiển thị popup yêu cầu thông báo");
             } else {
-              log("Bạn đã đăng ký nhận thông báo rồi");
+              log("Đã đăng ký nhận thông báo rồi");
+              const playerId = await OneSignal.getUserId();
+              log("Player ID hiện tại: " + playerId);
             }
           } catch (err) {
             log("Lỗi đăng ký push: " + err.message);
