@@ -2,17 +2,16 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>OneSignal Web Push (SDK v16)</title>
+  <title>OneSignal v16 Test</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
-  <h2>OneSignal Web Push Test (SDK v16)</h2>
+  <h2>Test OneSignal Web Push</h2>
   <button id="btnSubscribe">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
 
   <script>
     const logEl = document.getElementById("log");
-    const btn = document.getElementById("btnSubscribe");
     function log(msg) {
       console.log(msg);
       logEl.textContent += msg + "\n";
@@ -20,33 +19,32 @@
 
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
-      try {
-        await OneSignal.init({
-          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9",
-          notifyButton: { enable: true },
-        });
-        log("✅ OneSignal initialized");
+      log("✅ OneSignal initialized");
 
-        btn.addEventListener("click", async () => {
-          try {
-            const isPushEnabled = await OneSignal.isPushNotificationsEnabled();
-            log("🔐 Push enabled: " + isPushEnabled);
+      // Khởi tạo OneSignal SDK với appId
+      await OneSignal.init({
+        appId: "53c86d63-20f1-4b62-803a-52183b5efcc9",  // <-- Thay appId ở đây
+      });
 
-            if (!isPushEnabled) {
-              await OneSignal.showNativePrompt();
-              log("📣 Đã gửi yêu cầu quyền");
-            } else {
-              const userId = await OneSignal.getUserId();
-              log("🎯 Bạn đã đăng ký rồi, Player ID: " + userId);
-            }
-          } catch (err) {
-            log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
+      log("OneSignal.isPushNotificationsEnabled typeof: " + typeof OneSignal.isPushNotificationsEnabled);
+
+      const btn = document.getElementById("btnSubscribe");
+      btn.addEventListener("click", async () => {
+        try {
+          const enabled = await OneSignal.isPushNotificationsEnabled();
+          log("🔐 Push enabled: " + enabled);
+
+          if (!enabled) {
+            await OneSignal.showNativePrompt();
+            log("📣 Đã gửi yêu cầu quyền");
+          } else {
+            const userId = await OneSignal.getUserId();
+            log("🎯 Player ID: " + userId);
           }
-        });
-
-      } catch (err) {
-        log("❌ Lỗi khởi tạo OneSignal: " + err.message);
-      }
+        } catch (e) {
+          log("❌ Lỗi đăng ký nhận thông báo: " + e.message);
+        }
+      });
     });
   </script>
 </body>
