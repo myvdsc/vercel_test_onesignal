@@ -4,63 +4,69 @@
   <meta charset="UTF-8" />
   <title>OneSignal Web Push v16 Test</title>
 
+  <!-- Service Worker manifest -->
   <link rel="manifest" href="manifest.json" />
+
+  <!-- OneSignal SDK v16 -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function (OneSignal) {
-      try {
-        await OneSignal.init({
-          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // 🔁 Thay bằng App ID thật
-          serviceWorkerPath: "OneSignalSDKWorker.js",
-          serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
-          autoResubscribe: true,
-          promptOptions: {
-            slidedown: {
-              enabled: true,
-              actionMessage: "Bạn có muốn nhận thông báo?",
-              acceptButtonText: "Có",
-              cancelButtonText: "Không"
-            }
-          }
-        });
-
-        console.log("✅ OneSignal initialized");
-
-        // Kiểm tra xem đã có đăng ký chưa
-        const sub = await OneSignal.User.PushSubscription.getSubscription();
-        if (sub && sub.id) {
-          console.log("🔔 Đã đăng ký với Player ID:", sub.id);
-        } else {
-          console.log("❌ Chưa đăng ký nhận thông báo");
-        }
-
-        // Gắn sự kiện cho nút đăng ký
-        document.getElementById("subscribeBtn").addEventListener("click", async () => {
-          try {
-            await OneSignal.User.PushSubscription.optIn();
-            const sub = await OneSignal.User.PushSubscription.getSubscription();
-            if (sub && sub.id) {
-              console.log("✅ Đăng ký thành công với Player ID:", sub.id);
-              document.getElementById("log").textContent = "Player ID: " + sub.id;
-            } else {
-              console.log("❌ Đăng ký không thành công.");
-            }
-          } catch (e) {
-            console.error("❌ Lỗi đăng ký nhận thông báo:", e);
-          }
-        });
-
-      } catch (e) {
-        console.error("❌ Lỗi khởi tạo OneSignal:", e);
-      }
-    });
-  </script>
 </head>
 <body>
   <h2>Test OneSignal Web Push (SDK v16)</h2>
   <button id="subscribeBtn">Đăng ký nhận thông báo</button>
   <pre id="log"></pre>
+
+  <script>
+    const logEl = document.getElementById("log");
+    const log = (msg) => {
+      console.log(msg);
+      logEl.textContent += msg + "\n";
+    };
+
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      try {
+        await OneSignal.init({
+          appId: "53c86d63-20f1-4b62-803a-52183b5efcc9", // ✅ Thay bằng App ID thật từ OneSignal
+          serviceWorkerPath: "OneSignalSDKWorker.js",
+          serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
+          promptOptions: {
+            slidedown: {
+              enabled: true,
+              autoPrompt: false,
+              actionMessage: "Bạn có muốn nhận thông báo?",
+              acceptButtonText: "Đồng ý",
+              cancelButtonText: "Từ chối"
+            }
+          }
+        });
+
+        log("✅ OneSignal initialized");
+
+        const subscription = await OneSignal.User.PushSubscription.get();
+        if (subscription && subscription.id) {
+          log("🔔 Đã đăng ký với Player ID: " + subscription.id);
+        } else {
+          log("❌ Chưa đăng ký nhận thông báo.");
+        }
+
+        document.getElementById("subscribeBtn").addEventListener("click", async () => {
+          try {
+            await OneSignal.User.PushSubscription.optIn();
+            const sub = await OneSignal.User.PushSubscription.get();
+            if (sub && sub.id) {
+              log("✅ Đăng ký thành công với Player ID: " + sub.id);
+            } else {
+              log("❌ Không lấy được Player ID sau khi đăng ký.");
+            }
+          } catch (err) {
+            log("❌ Lỗi đăng ký nhận thông báo: " + err.message);
+          }
+        });
+
+      } catch (err) {
+        log("❌ Lỗi khởi tạo OneSignal: " + err.message);
+      }
+    });
+  </script>
 </body>
 </html>
